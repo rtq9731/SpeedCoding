@@ -14,9 +14,13 @@ public enum GameState
 public class PlayerMove : MonoBehaviour
 {
     [SerializeField] CarMove carPrefab = null;
+    [SerializeField] TrainMove trainPrefab = null;
+    [SerializeField] BoatMove boatPrefab = null;
 
     public static event Action<float> onPlayerMove;
     public static event Action onGameStay;
+
+    Coroutine cor = null;
 
     [SerializeField] float moveDist = 2f;
     [SerializeField] float inputCool = 1f;
@@ -32,6 +36,8 @@ public class PlayerMove : MonoBehaviour
     private void Awake()
     {
         GenericPoolManager.CratePool<CarMove>("Car", carPrefab, GameObject.Find("CarParent").transform, 10);
+        GenericPoolManager.CratePool<TrainMove>("Train", trainPrefab, GameObject.Find("CarParent").transform, 5);
+        GenericPoolManager.CratePool<BoatMove>("Boat", boatPrefab, GameObject.Find("CarParent").transform, 10);
     }
 
     void Update()
@@ -60,21 +66,21 @@ public class PlayerMove : MonoBehaviour
                 {
                     if (Input.GetKeyDown(KeyCode.UpArrow))
                     {
-                        inputTimer = 0f;
-
-                        transform.DOMoveY(3f, 0.2f).OnComplete(() => transform.DOMoveY(1f, 0.2f));
-                        transform.DOMove(transform.position + Vector3.forward * moveDist, 0.4f).OnComplete(() => onPlayerMove?.Invoke(transformZ += 2));
+                        cor = StartCoroutine(Move(Vector3.forward, moveDist, 0.4f, () => onPlayerMove?.Invoke(transformZ += 2)));
                     }
                     if (Input.GetKeyDown(KeyCode.LeftArrow) && transform.position.x - 2f >= minCharX)
                     {
-                        transform.DOMoveY(3f, 0.2f).OnComplete(() => transform.DOMoveY(1f, 0.2f));
-                        transform.DOMove(transform.position + Vector3.right * -moveDist, 0.4f);
+                        cor = StartCoroutine(Move(Vector3.right, -moveDist, 0.4f, () => { }));
                     }
                     if (Input.GetKeyDown(KeyCode.RightArrow) && transform.position.x + 2f <= maxCharX)
                     {
-                        transform.DOMoveY(3f, 0.2f).OnComplete(() => transform.DOMoveY(1f, 0.2f));
-                        transform.DOMove(transform.position + Vector3.right * moveDist, 0.4f);
+                        cor = StartCoroutine(Move(Vector3.right, moveDist, 0.4f, () => { }));
                     }
+                }
+
+                if(transform.position.x < minCharX || transform.position.x > maxCharX)
+                {
+                    GameOver();
                 }
                 break;
             default:
@@ -82,18 +88,40 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private IEnumerator Move(Vector3 dir, float moveDist, float moveTime, System.Action onComplete)
     {
-        if(collision.collider.CompareTag("Car"))
+        float moveTimer = 0f;
+        Vector3 dest = transform.position + moveDist * dir;
+
+        inputTimer = 0f;
+
+        while (moveTime > moveTimer)
         {
-            DOTween.CompleteAll();
-            transformZ = 0f;
-            transform.position = Vector3.up * 3;
-            state = GameState.Stay;
-            onGameStay?.Invoke();
+            moveTimer += Time.deltaTime;
+            transform.position = Vector3.Lerp(transform.position, dest, moveTimer / moveTime);
+            yield return null;
+        }
+        onComplete();
+    }
+
+    public void GameOver()
+    {
+        StopCoroutine(cor);
+        DOTween.CompleteAll();
+        transformZ = 0f;
+        transform.position = Vector3.up * 3;
+        state = GameState.Stay;
+        onGameStay?.Invoke();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("Car"))
+        {
+            GameOver();
         }
 
-        if(collision.collider.CompareTag("Road") && state == GameState.Stay)
+        if (other.CompareTag("Road") && state == GameState.Stay)
         {
             state = GameState.Ready;
         }

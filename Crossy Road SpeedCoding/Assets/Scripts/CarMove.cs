@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class CarMove : MonoBehaviour
 {
-    [SerializeField] float carSpeed;
+    [SerializeField] float _speed;
 
-    float plusRandSpeed = 0f;
+    float _plusRandSpeed = 0f;
 
     int _dir = 0;
 
@@ -15,10 +15,10 @@ public class CarMove : MonoBehaviour
     private void Start()
     {
         PlayerMove.onGameStay += () => gameObject.SetActive(false);
-        plusRandSpeed = Random.Range(0f, 2f);
+        _plusRandSpeed = Random.Range(0f, 2f);
     }
     
-    public void InitCar(Transform startPos, Transform endPoint, int dir)
+    public void InitObstacle(Transform startPos, Transform endPoint, int dir)
     {
         gameObject.SetActive(true);
         transform.position = startPos.position;
@@ -32,6 +32,6 @@ public class CarMove : MonoBehaviour
         {
             gameObject.SetActive(false);
         }
-        transform.Translate(Vector3.right * _dir * (carSpeed + plusRandSpeed) * Time.deltaTime);
+        transform.Translate(Vector3.right * _dir * (_speed + _plusRandSpeed) * Time.deltaTime);
     }
 }

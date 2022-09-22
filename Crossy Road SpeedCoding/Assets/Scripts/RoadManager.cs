@@ -21,6 +21,7 @@ public class RoadManager : MonoBehaviour
         {
             originPos.Add(roads[i].transform.position);
         }
+        ResetAllRoad();
     }
 
     private void ResetAllRoad()
@@ -29,7 +30,7 @@ public class RoadManager : MonoBehaviour
         for (int i = 0; i < roads.Count; i++)
         {
             roads[i].transform.position = originPos[i];
-            roads[i].InitRoad();
+            roads[i].InitRoad((RoadType)Random.Range(0, 3));
         }
     }
 
@@ -39,9 +40,9 @@ public class RoadManager : MonoBehaviour
         if (!roads.Find(item => item.transform.position.z == nextBlockPosZ))
         {
             curRoadNum++;
-            roads[curRoadNum % roads.Count].transform.position = Vector3.forward * nextBlockPosZ - Vector3.up * 3f;
-            roads[curRoadNum % roads.Count].transform.DOMoveY(0, 1f);
-            roads[curRoadNum % roads.Count].InitRoad();
+            roads[curRoadNum % roads.Count].transform.position = Vector3.forward * nextBlockPosZ; //- Vector3.up * 3f;
+            //roads[curRoadNum % roads.Count].transform.DOMoveY(0, 1f);
+            roads[curRoadNum % roads.Count].InitRoad((RoadType)Random.Range(0, 3));
         }
     }
 }
