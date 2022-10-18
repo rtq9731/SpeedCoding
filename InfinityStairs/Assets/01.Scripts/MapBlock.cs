@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class MapBlock : MonoBehaviour
     }
 }
 
+[Serializable]
 public class MapBlockSizeInfo
 {
     public int _xSize;

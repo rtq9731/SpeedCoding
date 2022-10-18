@@ -8,12 +8,12 @@ public class MapGenerator : MonoBehaviour
 
     [SerializeField] MapBlock[] blocks = null;
  
-    float _offSetX = 0f;
-    float _offSetY = 0f;
+    [SerializeField] float _offSetX = 0;
+    [SerializeField] float _offSetY = 1f;
 
     private void Update()
     {
-        if(player.position.y >= _offSetY - 10)
+        if(player.position.y >= _offSetY - 20)
         {
             GenerateMoreMap();
         }
@@ -23,10 +23,10 @@ public class MapGenerator : MonoBehaviour
     {
         MapBlock block = Instantiate<MapBlock>(blocks[Random.Range(0, blocks.Length)]);
 
+        block.SetMapBlock(new Vector2(_offSetX, _offSetY));
+
         _offSetX += block._sizeInfo._xSize;
         _offSetY += block._sizeInfo._ySize;
-
-        block.SetMapBlock(new Vector2(_offSetX, _offSetY));
     }
 
 }
